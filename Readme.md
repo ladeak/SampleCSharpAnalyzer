@@ -195,7 +195,7 @@ To create a code fix provider, we need to derive from ```CodeFixProvider``` type
 
 
 ```csharp
-public sealed override ImmutableArray&lt;string&gt; FixableDiagnosticIds
+public sealed override ImmutableArray<string> FixableDiagnosticIds
 {
   get { return ImmutableArray.Create(IsNullPatternAnalyzer.IsNullRuleId); }
 }
@@ -208,11 +208,11 @@ public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
   var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
   var diagnostic = context.Diagnostics.First();
   var diagnosticSpan = diagnostic.Location.SourceSpan;
-  var binaryExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType&lt;BinaryExpressionSyntax&gt;().First();
+  var binaryExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<BinaryExpressionSyntax>().First();
   context.RegisterCodeFix(
     CodeAction.Create(
       IsNullPatternAnalyzer.Title,
-      cancellation =&gt; ReplaceWithIsPattern(context.Document, binaryExpression, cancellation),
+      cancellation => ReplaceWithIsPattern(context.Document, binaryExpression, cancellation),
       IsNullPatternAnalyzer.Title),
     diagnostic);
 }
@@ -221,7 +221,7 @@ public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
 In the ```RegisterCodeFixesAsync``` method we can use the location of the diagnostic issue and the FindToken method to retrieve the BinaryExpressionSyntax in questions to be fixed. Then the ```ReplaceWithIsPattern``` method is invoked to create a fix:
 
 ```csharp
-private async Task&lt;Document&gt; ReplaceWithIsPattern(Document document, ExpressionSyntax expression, CancellationToken cancellationToken)
+private async Task<Document> ReplaceWithIsPattern(Document document, ExpressionSyntax expression, CancellationToken cancellationToken)
 {
   if(IfRecognizer.UsesEqualsForNullCheck(expression, out var otherIndentifer))
   {
@@ -242,9 +242,9 @@ Finally, as Roslyn works with immutable data structures, we create a new syntax 
 
 To test the solution (other than unit testing), we can either use the given VSIX project, or an easier way to is create a nuget package from the csproj containing the analyzer and code fix provider. For this we only need to right click on the IsNullAnalyzer project and select **Pack**. This will create a nupkg file in the bin\debug folder. At this point we can move this file or  [local nuget repository](https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds) and install it from there to our test application. Note, that for this to work there is a tools folder with an install.ps1 file given by the template project. This file is also referenced in the csproj of the analyzer
 ```
-&lt;ItemGroup&gt;
-    &lt;None Update=&quot;tools\*.ps1&quot; CopyToOutputDirectory=&quot;Always&quot; Pack=&quot;true&quot; PackagePath=&quot;&quot; &#x2F;&gt;
-    &lt;None Include=&quot;$(OutputPath)\$(AssemblyName).dll&quot; Pack=&quot;true&quot; PackagePath=&quot;analyzers&#x2F;dotnet&#x2F;cs&quot; Visible=&quot;false&quot; &#x2F;&gt;
-&lt;&#x2F;ItemGroup&gt;
+<ItemGroup>
+    <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+</ItemGroup>
 ```
 so it gets packaged up. When we install the nuget package this will make sure that our analyzer is installed properly.
