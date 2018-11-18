@@ -241,7 +241,7 @@ Finally, as Roslyn works with immutable data structures, we create a new syntax 
 #### Testing the Analyzer and Code Fix Provider ####
 
 To test the solution (other than unit testing), we can either use the given VSIX project, or an easier way to is create a nuget package from the csproj containing the analyzer and code fix provider. For this we only need to right click on the IsNullAnalyzer project and select **Pack**. This will create a nupkg file in the bin\debug folder. At this point we can move this file or  [local nuget repository](https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds) and install it from there to our test application. Note, that for this to work there is a tools folder with an install.ps1 file given by the template project. This file is also referenced in the csproj of the analyzer
-```
+```xml
 <ItemGroup>
     <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
